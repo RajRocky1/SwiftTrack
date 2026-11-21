@@ -1,52 +1,67 @@
 
-import { useState } from 'react';
-import Navbar from './Components/Navbar';
-import ShipmentList from './Components/ShipmentList';
+import { useEffect, useState } from 'react';
+import Navbar from './components/Navbar';
+import ShipmentList from './components/ShipmentList';
 import ShipmentForm from './Components/ShipmentForm';
 import './App.css';
 
 function App() {
 
-  const [shipments, setShipments] = useState([
-    {
-      id: 'ST1001',
-      sender: 'Ramesh',
-      receiver: 'Raj',
-      address: 'Mysuru',
-      status: 'Created'
-    },
-    {
-      id: 'ST1002',
-      sender: 'Suresh',
-      receiver: 'Ravi',
-      address: 'Bengaluru',
-      status: 'In Transit'
-    },
-    {
-      id: 'ST1003',
-      sender: 'Mahesh',
-      receiver: 'Kumar',
-      address: 'Mandya',
-      status: 'Delivered'
-    }
-  ]);
-
-  const [nextId, setNextId] = useState(1004);
+  const [shipments, setShipments] = useState([]);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  function addShipment(newShipment) {
+  // Get shipments from the backend - connecting frontend to backend
+  async function fetchShipments() {
+    try {
+      const response = await fetch('http://localhost:5000/api/shipments');
 
-    const shipment = {
-      id: 'ST' + nextId,
-      ...newShipment,
-      status: 'Created'
-    };
+      if (!response.ok) {
+        throw new Error('Failed to fetch shipments');
+      }
 
-    setShipments([...shipments, shipment]);
+      const data = await response.json();
+      setShipments(data);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
-    setNextId(nextId + 1);
+  // Load shipments when the page opens
+  useEffect(() => {
+    fetchShipments();
+  }, []);
 
-    setMessage('Shipment created successfully: ' + shipment.id);
+  // Send a new shipment to the backend
+  async function addShipment(newShipment) {
+    setMessage('');
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/shipments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newShipment)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create shipment');
+      }
+
+      await fetchShipments();
+
+      setMessage('Shipment created successfully: ' + data.id);
+
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    }
   }
 
   const totalShipments = shipments.length;
@@ -86,6 +101,7 @@ function App() {
         <ShipmentForm onAddShipment={addShipment} />
 
         {message && <p className="success">{message}</p>}
+        {error && <p className="error">{error}</p>}
 
         <ShipmentList shipments={shipments} />
       </main>

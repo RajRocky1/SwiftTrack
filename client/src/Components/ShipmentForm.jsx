@@ -1,5 +1,5 @@
 
-import  { useState } from 'react';
+import { useState } from 'react';
 
 function ShipmentForm(props) {
 
@@ -7,8 +7,9 @@ function ShipmentForm(props) {
   const [receiver, setReceiver] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (!sender.trim() || !receiver.trim() || !address.trim()) {
@@ -22,12 +23,20 @@ function ShipmentForm(props) {
       address: address.trim()
     };
 
-    props.onAddShipment(newShipment);
-
-    setSender('');
-    setReceiver('');
-    setAddress('');
     setError('');
+    setIsSubmitting(true);
+
+    try {
+      const success = await props.onAddShipment(newShipment);
+
+      if (success) {
+        setSender('');
+        setReceiver('');
+        setAddress('');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -61,7 +70,9 @@ function ShipmentForm(props) {
 
         {error && <p className="error">{error}</p>}
 
-        <button type="submit">Create Shipment</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Creating...' : 'Create Shipment'}
+        </button>
 
       </form>
     </div>
