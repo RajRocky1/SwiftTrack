@@ -81,3 +81,54 @@ th, td {
     overflow-x: auto;
   }
 }
+
+
+.shipment-form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.shipment-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shipment-form label {
+  font-weight: bold;
+}
+
+.shipment-form input,
+.shipment-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.shipment-form textarea {
+  min-height: 70px;
+}
+
+.shipment-form button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.shipment-form button:hover {
+  background-color: #1d4ed8;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+  font-weight: bold;
+}
